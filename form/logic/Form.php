@@ -1,6 +1,6 @@
 <?php
 include_once 'App.php';
-include_once $_SERVER["DOCUMENT_ROOT"].'/my_system/form/utility/Utility.php';
+include_once $_SERVER["DOCUMENT_ROOT"].'/artmo/form/utility/Utility.php';
 
 /**
  * Formクラス
@@ -19,13 +19,13 @@ class Form extends App {
 		
 		
 		// inputなら直リンク確認はなし
-		if ($mode == $this->form_mode_input) {
-			$form_tag = self::createForm($mode, $this->form_name, $method, $action, $submit_text, $_POST);
+		if ($mode == $this->configure->FORM_MODE_INPUT) {
+			$form_tag = self::createForm($mode, $this->configure->form_name, $method, $action, $submit_text, $_POST);
 		} else {
 			if ($_POST) {
-				$form_tag = self::createForm($mode, $this->form_name, $method, $action, $submit_text, $_POST);
+				$form_tag = self::createForm($mode, $this->configure->form_name, $method, $action, $submit_text, $_POST);
 			} else {
-				header("Location:".$this->input_file_name);
+				header("Location:".$this->configure->INPUT_FILE_NAME);
 				exit;
 			}
 		}
@@ -45,7 +45,7 @@ class Form extends App {
 	private function createForm($mode, $name, $method = null, $action = null, $submit_text = null, $post_data = null) {
 		
 		switch ($mode) {
-			case $this->form_mode_input:
+			case $this->configure->FORM_MODE_INPUT:
 				$form_tag = "";
 				
 				// エラー用div開始
@@ -68,7 +68,7 @@ class Form extends App {
 					$form_tag .= $this->utilInstance->formStartTag($name, $method, $action);
 				}
 				// フォームデータの埋め込み
-				$form_tag .= self::formInputTag($this->form_create_data);
+				$form_tag .= self::formInputTag($this->configure->form_create_data);
 				// submitボタン作成
 				if ($submit_text != null) {
 					$form_tag .= $this->utilInstance->formSubmitTag($submit_text);
@@ -79,7 +79,7 @@ class Form extends App {
 				$form_tag .= "</div>\n";
 				/** ここまでインプットフォーム **/
 				break;
-			case $this->form_mode_confirm:
+			case $this->configure->FORM_MODE_CONFIRM:
 				// マジッククォート判定
 				$post_data = $this->utilInstance->removeMagicQuotesGpc($post_data);
 				
@@ -87,7 +87,7 @@ class Form extends App {
 				$this->utilInstance->addSession($post_data);
 				
 				// 直リンクの場合はinput画面へ遷移
-				self::linkCheckReferer($this->input_name);
+				self::linkCheckReferer($this->configure->INPUT_NAME);
 				
 				// ワンタイムチケット確認
 				self::checkOneTimeTicket();
@@ -107,7 +107,7 @@ class Form extends App {
 				// submitボタン作成
 				if ($submit_text != null) {
 					// 戻るボタン
-					$form_tag .= $this->utilInstance->jsLinkButton("./".$this->input_file_name, $this->back_button_text);
+					$form_tag .= $this->utilInstance->jsLinkButton("./".$this->configure->INPUT_FILE_NAME, $this->configure->BACK_BUTTON_TEXT);
 					$form_tag .= $this->utilInstance->formSubmitTag($submit_text);
 				}
 				// フォーム終了
@@ -116,12 +116,12 @@ class Form extends App {
 				$form_tag .= "</div>\n";
 				/** ここまで確認フォーム **/
 				break;
-			case $this->form_mode_finish:
+			case $this->configure->FORM_MODE_FINISH:
 				// ワンタイムチケット確認
 				self::checkOneTimeTicket();
 				
 				// 直リンクの場合はinput画面へ遷移
-				self::linkCheckReferer($this->confirm_name);
+				self::linkCheckReferer($this->configure->CONFIRM_NAME);
 				
 				/** 完了画面作成 **/
 				// div開始
@@ -129,8 +129,8 @@ class Form extends App {
 				// フォームタグの作成
 				$form_tag .= "<form>";
 				// 完了画面テキストの埋め込み
-				$form_tag .= self::formFinishTag($this->finish_text);
-				$form_tag .= $this->utilInstance->jsLinkButton("./".$this->input_file_name);
+				$form_tag .= self::formFinishTag($this->configure->FINISH_TEXT);
+				$form_tag .= $this->utilInstance->jsLinkButton("./".$this->configure->INPUT_FILE_NAME);
 				// フォーム終了
 				$form_tag .= "</form>";
 				// div終了
@@ -165,18 +165,18 @@ class Form extends App {
 			// タグ生成
 			switch ($value["type"]) {
 				// タイプがtextの場合
-				case $this->type_text:
-					$form_tag .= "<p><label for='".$value["name"]."'>".$this->inputDataCheck[$value["name"]]['name'].(($this->inputDataCheck[$value["name"]]['required']) ? " *" : "")."</label><input id='".$value["name"]."' type='".$value["type"]."' name='".$value["name"]."' value='".$data[$value["name"]]."'></p>\n";
+				case $this->configure->TYPE_TEXT:
+					$form_tag .= "<p><label for='".$value["name"]."'>".$this->configure->inputDataCheck[$value["name"]]['name'].(($this->configure->inputDataCheck[$value["name"]]['required']) ? " *" : "")."</label><input id='".$value["name"]."' type='".$value["type"]."' name='".$value["name"]."' value='".$data[$value["name"]]."'></p>\n";
 					break;
 				// タイプがtextareaの場合
-				case $this->type_textarea:
-					$form_tag .= "<p><label for='".$value["name"]."'>".$this->inputDataCheck[$value["name"]]['name'].(($this->inputDataCheck[$value["name"]]['required']) ? " *" : "")."</label><textarea id='".$value["name"]."' name='".$value["name"]."'>".$data[$value["name"]]."</textarea><p>\n";
+				case $this->configure->TYPE_TEXTAREA:
+					$form_tag .= "<p><label for='".$value["name"]."'>".$this->configure->inputDataCheck[$value["name"]]['name'].(($this->configure->inputDataCheck[$value["name"]]['required']) ? " *" : "")."</label><textarea id='".$value["name"]."' name='".$value["name"]."'>".$data[$value["name"]]."</textarea><p>\n";
 					break;
 				default:
-					if ($value["name"] == $this->link_check_referer) {
+					if ($value["name"] == $this->configure->LINK_CHECK_REFERER) {
 						// 不正リンク対策
-						$form_tag .= "<input type='".$value["type"]."' name='".$value["name"]."' value='".$this->input_name."'>\n";
-					} elseif ($value["name"] == $this->one_time_ticket_name) {
+						$form_tag .= "<input type='".$value["type"]."' name='".$value["name"]."' value='".$this->configure->INPUT_NAME."'>\n";
+					} elseif ($value["name"] == $this->configure->ONE_TIME_TICKET_NAME) {
 						// ワンタイムチケット
 						$form_tag .= "<input type='".$value["type"]."' name='".$value["name"]."' value='".$this->one_time_ticket."'>\n";
 					} else {
@@ -201,12 +201,12 @@ class Form extends App {
 		if ($post_data != null) {
 			foreach ($post_data as $key => $value) {
 				// refererならタグをつくらない
-				if ($key == $this->link_check_referer) {
-					$form_tag .= "<input type='".$this->type_hidden."' name='".$this->link_check_referer."' value='".$this->confirm_name."'>\n";
-				} elseif ($key == $this->one_time_ticket_name) {
-					$form_tag .= "<input type='".$this->type_hidden."' name='".$this->one_time_ticket_name."' value='".$this->one_time_ticket."'>\n";
+				if ($key == $this->configure->LINK_CHECK_REFERER) {
+					$form_tag .= "<input type='".$this->configure->TYPE_HIDDEN."' name='".$this->configure->LINK_CHECK_REFERER."' value='".$this->configure->CONFIRM_NAME."'>\n";
+				} elseif ($key == $this->configure->ONE_TIME_TICKET_NAME) {
+					$form_tag .= "<input type='".$this->configure->TYPE_HIDDEN."' name='".$this->configure->ONE_TIME_TICKET_NAME."' value='".$this->one_time_ticket."'>\n";
 				} else {
-					$form_tag .= "<p><label>".$this->inputDataCheck[$key]['name']."</label><p class='form_span'>".$this->utilInstance->es($value)."</p></p>\n";
+					$form_tag .= "<p><label>".$this->configure->inputDataCheck[$key]['name']."</label><p class='form_span'>".$this->utilInstance->es($value)."</p></p>\n";
 				}
 			}
 		}
@@ -228,8 +228,8 @@ class Form extends App {
 	 * @param 	$display_name	// 画面名
 	 */
 	private function linkCheckReferer($display_name) {
-		if ($_POST[$this->link_check_referer] == "" && $_POST[$this->link_check_referer] != $display_name) {
-			header("Location:".$this->input_file_name);
+		if ($_POST[$this->configure->LINK_CHECK_REFERER] == "" && $_POST[$this->configure->LINK_CHECK_REFERER] != $display_name) {
+			header("Location:".$this->configure->INPUT_FILE_NAME);
 			exit;
 		}
 	}
@@ -238,9 +238,9 @@ class Form extends App {
 	 * ワンタイムチケット確認
 	 */
 	private function checkOneTimeTicket() {
-		if (isset($_POST[$this->one_time_ticket_name]) && isset($_SESSION[$this->one_time_ticket_name])) {
-			if (!in_array($_POST[$this->one_time_ticket_name], $_SESSION[$this->one_time_ticket_name])) {
-				header("Location:".$this->input_file_name);
+		if (isset($_POST[$this->configure->ONE_TIME_TICKET_NAME]) && isset($_SESSION[$this->configure->ONE_TIME_TICKET_NAME])) {
+			if (!in_array($_POST[$this->configure->ONE_TIME_TICKET_NAME], $_SESSION[$this->configure->ONE_TIME_TICKET_NAME])) {
+				header("Location:".$this->configure->INPUT_FILE_NAME);
 				exit;
 			}
 		}
@@ -264,10 +264,10 @@ class Form extends App {
 	 * @param	$data	// 対象データ
 	 */
 	private function checkRequired($data) {
-		foreach ($this->inputDataCheck as $key => $value) {
+		foreach ($this->configure->inputDataCheck as $key => $value) {
 			if ($value['required']) {
 				if ($data[$key] == "") {
-					$_SESSION['input_error'][$key] = $value['name'].$this->inputErrorText['required'];
+					$_SESSION['input_error'][$key] = $value['name'].$this->configure->inputErrorText['required'];
 					$error[$key] = false;
 				} else {
 					if (isset($_SESSION['input_error'][$key])) {
@@ -284,7 +284,7 @@ class Form extends App {
 		
 		// falseがあればinput画面に遷移しエラー表示
 		if (!$check_flg) {
-			header("Location:".$this->input_file_name);
+			header("Location:".$this->configure->INPUT_FILE_NAME);
 			exit;
 		}
 	}
@@ -294,10 +294,10 @@ class Form extends App {
 	 * @param	$data	// 対象データ
 	 */
 	private function checkMailAddress($data) {
-		foreach ($this->inputDataCheck as $key => $value) {
+		foreach ($this->configure->inputDataCheck as $key => $value) {
 			if ($value['mail']) {
 				if(!preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $data[$key])){
-					$_SESSION['input_error'][$key] = $value['name'].$this->inputErrorText['mail'];
+					$_SESSION['input_error'][$key] = $value['name'].$this->configure->inputErrorText['mail'];
 					$error[$key] = false;
 				} else {
 					if (isset($_SESSION['input_error'][$key])) {
@@ -314,7 +314,7 @@ class Form extends App {
 		
 		// falseがあればinput画面に遷移しエラー表示
 		if (!$check_flg) {
-			header("Location:".$this->input_file_name);
+			header("Location:".$this->configure->INPUT_FILE_NAME);
 			exit;
 		}
 	}
@@ -324,11 +324,11 @@ class Form extends App {
 	 * @param	$data	// 対象データ
 	 */
 	private function checkStrNum($data) {
-		foreach ($this->inputDataCheck as $key => $value) {
+		foreach ($this->configure->inputDataCheck as $key => $value) {
 			if ($value['strnum'] > 0) {
 				$length = mb_strlen($data[$key], "UTF-8");
 				if($length < 0 || $length > $value['strnum']){
-					$_SESSION['input_error'][$key] = $value['name'].$this->inputErrorText['strnum'];
+					$_SESSION['input_error'][$key] = $value['name'].$this->configure->inputErrorText['strnum'];
 					$error[$key] = false;
 				} else {
 					if (isset($_SESSION['input_error'][$key])) {
@@ -345,7 +345,7 @@ class Form extends App {
 		
 		// falseがあればinput画面に遷移しエラー表示
 		if (!$check_flg) {
-			header("Location:".$this->input_file_name);
+			header("Location:".$this->configure->INPUT_FILE_NAME);
 			exit;
 		}
 	}
@@ -356,28 +356,28 @@ class Form extends App {
 	private function sendMailExec() {
 		
 		// 返信メールの有無
-		$return_mail = $this->return_mail;
+		$return_mail = $this->configure->RETURN_MAIL;
 		
 		// 管理者メールアドレス
-		$admin_mail = $this->admin_mail;
+		$admin_mail = $this->configure->ADMIN_MAIL;
 		// 管理者メール用タイトル
-		$admin_subject = $this->admin_mail_subject;
+		$admin_subject = $this->configure->ADMIN_MAIL_SUBJECT;
 		
 		// ユーザーメールアドレスと名前
 		$user_mail = ((isset($_SESSION["post_data"]["mail"])) ? $_SESSION["post_data"]["mail"] : $admin_mail);
 		$user_name = ((isset($_SESSION["post_data"]["name"])) ? $_SESSION["post_data"]["name"] : "");
 		
 		// ユーザー（返信）メールのタイトル
-		$user_subject = $this->user_mail_subject;
+		$user_subject = $this->configure->USER_MAIL_SUBJECT;
 		
 		// mbstringの日本語設定
-		self::mbLanguage($this->mail_language, $this->mail_encode);
+		self::mbLanguage($this->configure->MAIL_LANGUAGE, $this->configure->MAIL_ENCODE);
 		
 		// メールヘッダー
 		$header = self::createMailHeader($user_name, $user_mail);
 		
 		// 管理者メールメッセージ文
-		$sendmsg = self::createMailText($this->admin_mail_text_subject, $_SESSION["post_data"]);
+		$sendmsg = self::createMailText($this->configure->ADMIN_MAIL_TEXT_SUBJECT, $_SESSION["post_data"]);
 		
 		// 環境フラグ
 		$env_flg = $this->utilInstance->checkEnv();
@@ -390,12 +390,12 @@ class Form extends App {
 					// メールヘッダー
 					$header = self::createMailHeader($user_name, $admin_mail);
 					// ユーザーメールメッセージ文
-					$sendmsg = self::createMailText($this->user_mail_text_subject, $_SESSION["post_data"]);
+					$sendmsg = self::createMailText($this->configure->USER_MAIL_TEXT_SUBJECT, $_SESSION["post_data"]);
 					
 					mb_send_mail($user_mail, $user_subject, $sendmsg, $header);
 				}
 			}else{
-				echo $this->send_mail_error_text;
+				echo $this->configure->SEND_MAIL_ERROR_TEXT;
 				exit;
 			}
 		}
@@ -414,7 +414,7 @@ class Form extends App {
 			if ($key == "referer" || $key == "one_time_ticket") {
 				continue;
 			}
-			$msg .= "【".$this->inputDataCheck[$key]['name']."】\n".$value."\n\n";
+			$msg .= "【".$this->configure->inputDataCheck[$key]['name']."】\n".$value."\n\n";
 		}
 		$msg .= "===================================\n\n";
 		
